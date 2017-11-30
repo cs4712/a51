@@ -516,7 +516,16 @@ void* vc2(void *arg){
             std::cout << "Error : can not get thread vc2 time" << std::endl;
         } 
 
-
+        int k1=0;
+        for (int i=0;i<v.size()-1;i=i+2){
+            if (v[i]!=v[i+1]){
+                k1=1;
+                break;
+            }
+        }
+        if (k1==0)
+            continue;
+        
         vertex_cover3.push_back(v[0]);
         vertex_cover3.push_back(v[1]);
 
