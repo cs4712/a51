@@ -523,32 +523,32 @@ void* vc2(void *arg){
                 break;
             }
         }
-        if (k1==0)
-            continue;
-        
-        vertex_cover3.push_back(v[0]);
-        vertex_cover3.push_back(v[1]);
+        if (k1==1){
+    
+            vertex_cover3.push_back(v[0]);
+            vertex_cover3.push_back(v[1]);
 
-        for (unsigned int i = 2; i < v.size()-1; i=i+2)
-        {
-            int k;
-            for(unsigned int j=0; j< vertex_cover3.size(); ++j)
+            for (unsigned int i = 2; i < v.size()-1; i=i+2)
             {
-                if((v[i]!=vertex_cover3[j]) && (v[i+1]!=vertex_cover3[j]) && v[i]!=v[i+1])
+                int k;
+                for(unsigned int j=0; j< vertex_cover3.size(); ++j)
                 {
-                    k=1;
-                }
-                else
+                    if((v[i]!=vertex_cover3[j]) && (v[i+1]!=vertex_cover3[j]) && v[i]!=v[i+1])
+                    {
+                        k=1;
+                    }
+                    else
+                    {
+                        k=0;
+                        break;
+                    }
+                } 
+                if(k ==1)
                 {
-                    k=0;
-                    break;
+                    vertex_cover3.push_back(v[i]);
+                    vertex_cover3.push_back(v[i+1]);
                 }
-            } 
-            if(k ==1)
-            {
-                vertex_cover3.push_back(v[i]);
-                vertex_cover3.push_back(v[i+1]);
-            }         
+            }
         }
 
         //////////////////////////////////////////////////////
