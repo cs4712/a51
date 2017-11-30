@@ -14,6 +14,7 @@
 
 sem_t io_se1, io_se2, io_se3, vc_se1, vc_se2, vc_se3;
 
+double total_time1, total_time2, total_time3;
 bool io_exit = 0;
 const int  maxv = 999;
 const int max_vertex_num = 20;
@@ -172,7 +173,10 @@ void* io(void *arg){
                 sem_wait(&vc_se1);
                 sem_wait(&vc_se2);
                 sem_wait(&vc_se3);
-
+                
+                std::cout << "minisat time : " << total_time1 << " ms"<< std::endl;
+                std::cout << "vc1 time : " << total_time2 << " ms"<< std::endl;
+                std::cout << "vc2 time : " << total_time3 << " ms"<< std::endl;
                 ////////////// minisat output ///////////////
 
                 if (vertex_cover1.size() > 0){
@@ -266,7 +270,7 @@ void* minisat(void *arg){
         clockid_t cid;
         int retcode;
         struct timespec start, stop;
-        double total_time;
+        //double total_time;
 
         retcode = pthread_getcpuclockid(pthread_self(), &cid);
 
@@ -386,8 +390,8 @@ void* minisat(void *arg){
         if (clock_gettime(cid, &stop)==-1){
         std::cout << "Error : can not get thread minisat time" << std::endl;
         }  
-        total_time = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
-        std::cout << "minisat time : " << total_time << " ms"<< std::endl;
+        total_time1 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
+        //std::cout << "minisat time : " << total_time << " ms"<< std::endl;
 
         sem_post(&vc_se1);
     }
@@ -409,7 +413,7 @@ void* vc1(void *arg){
         clockid_t cid;
         int retcode;
         struct timespec start, stop;
-        double total_time;
+        //double total_time;
 
         retcode = pthread_getcpuclockid(pthread_self(), &cid);
 
@@ -478,8 +482,8 @@ void* vc1(void *arg){
         if (clock_gettime(cid, &stop)==-1){
         std::cout << "Error : can not get thread vc1 time" << std::endl;
         }  
-        total_time = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
-        std::cout << "vc1 time : " << total_time << " ms" << std::endl;
+        total_time2 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
+        //std::cout << "vc1 time : " << total_time << " ms" << std::endl;
         
 
         sem_post(&vc_se2);
@@ -501,7 +505,7 @@ void* vc2(void *arg){
         clockid_t cid;
         int retcode;
         struct timespec start, stop;
-        double total_time;
+        //double total_time;
 
         retcode = pthread_getcpuclockid(pthread_self(), &cid);
 
@@ -543,8 +547,8 @@ void* vc2(void *arg){
         if (clock_gettime(cid, &stop)==-1){
         std::cout << "Error : can not get thread vc2 time" << std::endl;
         }  
-        total_time = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
-        std::cout << "vc2 time : " << total_time << " ms" << std::endl;
+        total_time3 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
+        //std::cout << "vc2 time : " << total_time << " ms" << std::endl;
 
         sem_post(&vc_se3);
     }
