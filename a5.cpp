@@ -390,7 +390,7 @@ void* minisat(void *arg){
         if (clock_gettime(cid, &stop)==-1){
         std::cout << "Error : can not get thread minisat time" << std::endl;
         }  
-        total_time1 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
+        total_time1 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
         //std::cout << "minisat time : " << total_time << " ms"<< std::endl;
 
         sem_post(&vc_se1);
@@ -482,7 +482,7 @@ void* vc1(void *arg){
         if (clock_gettime(cid, &stop)==-1){
         std::cout << "Error : can not get thread vc1 time" << std::endl;
         }  
-        total_time2 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
+        total_time2 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
         //std::cout << "vc1 time : " << total_time << " ms" << std::endl;
         
 
@@ -547,7 +547,7 @@ void* vc2(void *arg){
         if (clock_gettime(cid, &stop)==-1){
         std::cout << "Error : can not get thread vc2 time" << std::endl;
         }  
-        total_time3 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_sec)/1000000;
+        total_time3 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
         //std::cout << "vc2 time : " << total_time << " ms" << std::endl;
 
         sem_post(&vc_se3);
