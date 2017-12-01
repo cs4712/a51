@@ -294,97 +294,100 @@ void* minisat(void *arg){
         }
         if (edge_num == 0){
             vertex_cover1.clear();
-            break;
         }
+        else{
         
-        int vertex_min = 1;
-        
-        while (vertex_min<num)
-        {
+            int vertex_min = 1;
             
-            // -- allocate on the heap so that we can reset later if needed
-            std::unique_ptr<Minisat::Solver> solver(new Minisat::Solver());
-            
-            Minisat::Lit vertices[num][vertex_min];
-            
-            
-            for (int i=0;i<num;i++){
-                for (int k=0;k<vertex_min;k++){
-                    vertices[i][k] = Minisat::mkLit(solver->newVar());
-                }
-            }
-        
-            //1.At least one vertex is the ith vertex in the vertex cover.
-            
-            for (int k=0;k<vertex_min;k++){
-                Minisat::vec<Minisat::Lit> clauses1;
+            while (vertex_min<num)
+            {
+                
+                // -- allocate on the heap so that we can reset later if needed
+                std::unique_ptr<Minisat::Solver> solver(new Minisat::Solver());
+                
+                Minisat::Lit vertices[num][vertex_min];
+                
+                
                 for (int i=0;i<num;i++){
-                    clauses1.push(vertices[i][k]);
-                }
-                solver->addClause (clauses1);
-            }
-            
-            //2.No one vertex can appear twice in a vertex cover.
-            
-            for (int i=0;i<num;i++){
-                for (int m=0;m<vertex_min-1;m++){
-                    for (int n=m+1;n<vertex_min;n++){
-                        Minisat::vec<Minisat::Lit> clauses2;
-                        clauses2.push(~vertices[i][m]);
-                        clauses2.push(~vertices[i][n]);
-                        solver->addClause (clauses2);
+                    for (int k=0;k<vertex_min;k++){
+                        vertices[i][k] = Minisat::mkLit(solver->newVar());
                     }
                 }
-            }
             
-            //3.No more than one vertex appears in the mth position of the vertex cover.
-            
-            for (int k=0;k<vertex_min;k++){
-                for (int m=0;m<num-1;m++){
-                    for (int n=m+1;n<num;n++){
-                        Minisat::vec<Minisat::Lit> clauses3;
-                        clauses3.push(~vertices[m][k]);
-                        clauses3.push(~vertices[n][k]);
-                        solver->addClause (clauses3);
-                    }
-                }
-            }
-            
-            //4.Every edge is incident to at least one vertex in the vertex cover.
-            
-            for (int i=0;i<num;i++){
-                for (int j=i;j<num;j++){
-                    if (edgs[i][j] == 1 && i!=j){
-                        Minisat::vec<Minisat::Lit> clauses4;
-                        for (int k=0;k<vertex_min;k++){
-                            clauses4.push(vertices[i][k]);
-                            clauses4.push(vertices[j][k]);
-                        }
-                        solver->addClause (clauses4);
-                    }
-                }
-            }
-            
-            bool res = false;
-            res = solver->solve();
-            
-            if (res){
-                //std::cout << vertex_min << " is the number of vertex cover\n";
+                //1.At least one vertex is the ith vertex in the vertex cover.
+                
                 for (int k=0;k<vertex_min;k++){
+                    Minisat::vec<Minisat::Lit> clauses1;
                     for (int i=0;i<num;i++){
-                        if (Minisat::toInt(solver->modelValue(vertices[i][k]))==0){
-                            vertex_cover1.push_back(i);
+                        clauses1.push(vertices[i][k]);
+                    }
+                    solver->addClause (clauses1);
+                }
+                
+                //2.No one vertex can appear twice in a vertex cover.
+                
+                for (int i=0;i<num;i++){
+                    for (int m=0;m<vertex_min-1;m++){
+                        for (int n=m+1;n<vertex_min;n++){
+                            Minisat::vec<Minisat::Lit> clauses2;
+                            clauses2.push(~vertices[i][m]);
+                            clauses2.push(~vertices[i][n]);
+                            solver->addClause (clauses2);
                         }
                     }
                 }
+                
+                //3.No more than one vertex appears in the mth position of the vertex cover.
+                
+                for (int k=0;k<vertex_min;k++){
+                    for (int m=0;m<num-1;m++){
+                        for (int n=m+1;n<num;n++){
+                            Minisat::vec<Minisat::Lit> clauses3;
+                            clauses3.push(~vertices[m][k]);
+                            clauses3.push(~vertices[n][k]);
+                            solver->addClause (clauses3);
+                        }
+                    }
+                }
+                
+                //4.Every edge is incident to at least one vertex in the vertex cover.
+                
+                for (int i=0;i<num;i++){
+                    for (int j=i;j<num;j++){
+                        if (edgs[i][j] == 1 && i!=j){
+                            Minisat::vec<Minisat::Lit> clauses4;
+                            for (int k=0;k<vertex_min;k++){
+                                clauses4.push(vertices[i][k]);
+                                clauses4.push(vertices[j][k]);
+                            }
+                            solver->addClause (clauses4);
+                        }
+                    }
+                }
+                
+                bool res = false;
+                res = solver->solve();
+                
+                if (res){
+                    //std::cout << vertex_min << " is the number of vertex cover\n";
+                    for (int k=0;k<vertex_min;k++){
+                        for (int i=0;i<num;i++){
+                            if (Minisat::toInt(solver->modelValue(vertices[i][k]))==0){
+                                vertex_cover1.push_back(i);
+                            }
+                        }
+                    }
 
-                break;
+                    break;
+                }
+                
+                solver.reset (new Minisat::Solver());
+                
+                vertex_min++;
             }
-            
-            solver.reset (new Minisat::Solver());
-            
-            vertex_min++;
         }
+        
+        std::cout << "minisat finish" << std::endl;
         ////////////////////////////////////////////////////////////
 
         if (clock_gettime(cid, &stop)==-1){
@@ -517,18 +520,19 @@ void* vc2(void *arg){
         } 
 
         int k1=0;
-        for (int i=0;i<v.size()-1;i=i+2){
-            if (v[i]!=v[i+1]){
+        int fir = 0
+        for (fir=0;fir<v.size()-1;fir=fir+2){
+            if (v[fir]!=v[fir+1]){
                 k1=1;
                 break;
             }
         }
         if (k1==1){
     
-            vertex_cover3.push_back(v[0]);
-            vertex_cover3.push_back(v[1]);
+            vertex_cover3.push_back(v[fir]);
+            vertex_cover3.push_back(v[fir+1]);
 
-            for (unsigned int i = 2; i < v.size()-1; i=i+2)
+            for (unsigned int i = fir+2; i < v.size()-1; i=i+2)
             {
                 int k;
                 for(unsigned int j=0; j< vertex_cover3.size(); ++j)
