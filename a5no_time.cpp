@@ -14,7 +14,7 @@
 
 sem_t io_se1, io_se2, io_se3, vc_se1, vc_se2, vc_se3;
 
-//double total_time1, total_time2, total_time3;
+double total_time1, total_time2, total_time3;
 bool io_exit = 0;
 const int  maxv = 999;
 const int max_vertex_num = 20;
@@ -49,7 +49,7 @@ void* io(void *arg){
         
         switch(comma){
             case 'V' :{
-
+                
                 //input
                 
                 // read the amount of vertices
@@ -64,7 +64,7 @@ void* io(void *arg){
                     std::cerr << "Error : no vertex input" << std::endl;
                     break;
                 }
-
+                
                 if (num>20){
                     std::cerr << "Error : no more than 20 vertices" << std::endl;
                     break;
@@ -79,12 +79,12 @@ void* io(void *arg){
                 }
                 
                 
-
+                
                 err1 = 1;       //successful V command
                 err2 = 4;       //first successful V comand
                 break;
             }
-                   
+                
             case 'E' : {
                 
                 std::string line;
@@ -159,7 +159,7 @@ void* io(void *arg){
                     edgs[e[j]][e[j+1]] = 1;
                     edgs[e[j+1]][e[j]] = 1;
                 }
-
+                
                 for (int i=0; i<=m;++i)
                 {
                     v.push_back(e[i]);
@@ -167,22 +167,22 @@ void* io(void *arg){
                 err1 = 3;       //first successful E command
                 err2 = 0;       //can input V again after successful E command
                 
-                sem_post(&io_se1); 
+                sem_post(&io_se1);
                 sem_post(&io_se2);
                 sem_post(&io_se3);
-
+                
                 // output
-
+                
                 sem_wait(&vc_se1);
                 sem_wait(&vc_se2);
                 sem_wait(&vc_se3);
                 
-//                std::cout << "minisat time : " << total_time1 << " ms"<< std::endl;
-//                std::cout << "vc1 time : " << total_time2 << " ms"<< std::endl;
-//                std::cout << "vc2 time : " << total_time3 << " ms"<< std::endl;
+                std::cout << "minisat time : " << total_time1 << " ms"<< std::endl;
+                std::cout << "vc1 time : " << total_time2 << " ms"<< std::endl;
+                std::cout << "vc2 time : " << total_time3 << " ms"<< std::endl;
                 
                 ////////////// minisat output ///////////////
-
+                
                 if (vertex_cover1.size() > 0){
                     std::sort(vertex_cover1.begin(), vertex_cover1.end());
                     
@@ -196,15 +196,15 @@ void* io(void *arg){
                 else{
                     std::cout << "CNF-SAT-VC: " << std::endl;
                 }
-
-                vertex_cover1.clear();
-
-                /////////////////////////////////////////////
-
                 
-       
+                vertex_cover1.clear();
+                
+                /////////////////////////////////////////////
+                
+                
+                
                 ///////////////// vc1 output ///////////////
-
+                
                 if (vertex_cover2.size() > 0){
                     std::sort(vertex_cover2.begin(), vertex_cover2.end());
                     
@@ -218,15 +218,15 @@ void* io(void *arg){
                 else{
                     std::cout << "APPROX-VC-1: " << std::endl;
                 }
-
-                vertex_cover2.clear();
-
-                /////////////////////////////////////////////
-
                 
-
+                vertex_cover2.clear();
+                
+                /////////////////////////////////////////////
+                
+                
+                
                 ///////////////// vc2 output ///////////////
-
+                
                 if (vertex_cover3.size() > 0){
                     std::sort(vertex_cover3.begin(), vertex_cover3.end());
                     
@@ -240,23 +240,23 @@ void* io(void *arg){
                 else{
                     std::cout << "APPROX-VC-2: " << std::endl;
                 }
-
+                
                 vertex_cover3.clear();
                 v.clear();
-
+                
                 /////////////////////////////////////////////
             }
                 
                 // other command
             default:
                 
-                break;                
+                break;
         }
         
     }
-
+    
     io_exit = 1;
-    sem_post(&io_se1); 
+    sem_post(&io_se1);
     sem_post(&io_se2);
     sem_post(&io_se3);
     return 0;
@@ -265,29 +265,29 @@ void* io(void *arg){
 void* minisat(void *arg){
     
     while(true){
-
+        
         sem_wait(&io_se1);
-
+        
         if (io_exit==1)
             break;
-
-//        clockid_t cid;
-//        int retcode;
-//        struct timespec start, stop;
-//
-//        retcode = pthread_getcpuclockid(pthread_self(), &cid);
-//
-//        if(retcode){
-//            std::cerr << "Error: could not get thread time(minisat) " << std::endl;
-//        }
-//        if (clock_gettime(cid, &start)==-1){
-//            std::cout << "Error : can not get thread minisat time" << std::endl;
-//        } 
-
+        
+        clockid_t cid;
+        int retcode;
+        struct timespec start, stop;
+        
+        retcode = pthread_getcpuclockid(pthread_self(), &cid);
+        
+        if(retcode){
+            std::cerr << "Error: could not get thread time(minisat) " << std::endl;
+        }
+        if (clock_gettime(cid, &start)==-1){
+            std::cout << "Error : can not get thread minisat time" << std::endl;
+        }
+        
         /////////////////////////////////////////////////////
-
+        
         int edge_num = 0;
-
+        
         for (int i=0;i<num;i++){
             for (int j=i;j<num;j++){
                 if (edgs[i][j] == 1){
@@ -299,7 +299,7 @@ void* minisat(void *arg){
             vertex_cover1.clear();
         }
         else{
-        
+            
             int vertex_min = 1;
             
             while (vertex_min<num)
@@ -316,7 +316,7 @@ void* minisat(void *arg){
                         vertices[i][k] = Minisat::mkLit(solver->newVar());
                     }
                 }
-            
+                
                 //1.At least one vertex is the ith vertex in the vertex cover.
                 
                 for (int k=0;k<vertex_min;k++){
@@ -380,7 +380,7 @@ void* minisat(void *arg){
                             }
                         }
                     }
-
+                    
                     break;
                 }
                 
@@ -391,57 +391,57 @@ void* minisat(void *arg){
         }
         
         ////////////////////////////////////////////////////////////
-
-//        if (clock_gettime(cid, &stop)==-1){
-//        std::cout << "Error : can not get thread minisat time" << std::endl;
-//        }  
-//        total_time1 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
-
+        
+        if (clock_gettime(cid, &stop)==-1){
+            std::cout << "Error : can not get thread minisat time" << std::endl;
+        }
+        total_time1 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
+        
         sem_post(&vc_se1);
     }
-
+    
     return 0;
 }
 
 void* vc1(void *arg){
-
-
+    
+    
     while(true)
     {
-
+        
         sem_wait(&io_se2);
-
+        
         if (io_exit==1)
             break;
-
-//        clockid_t cid;
-//        int retcode;
-//        struct timespec start, stop;
-//
-//        retcode = pthread_getcpuclockid(pthread_self(), &cid);
-//
-//        if(retcode){
-//            std::cerr << "Error: could not get thread time(vc1) " << std::endl;
-//        }
-//        if (clock_gettime(cid, &start)==-1){
-//            std::cout << "Error : can not get thread vc1 time" << std::endl;
-//        }   
+        
+        clockid_t cid;
+        int retcode;
+        struct timespec start, stop;
+        
+        retcode = pthread_getcpuclockid(pthread_self(), &cid);
+        
+        if(retcode){
+            std::cerr << "Error: could not get thread time(vc1) " << std::endl;
+        }
+        if (clock_gettime(cid, &start)==-1){
+            std::cout << "Error : can not get thread vc1 time" << std::endl;
+        }
         
         ////////////////////////////////////////////////////////
         int temp_arr[num][num];
-
+        
         for (int i=0;i<num;i++){
             for (int j=0;j<num;j++){
                 temp_arr[i][j] = edgs[i][j];
             }
         }
-
+        
         while (true)
         {
-
+            
             int degree_max = 0;
             int max_degree_vertex = 99;     //valid vertex number < 50
-
+            
             for (int i=0;i<num;i++){
                 int temp = 0;
                 for (int j=0;j<num;j++){
@@ -458,7 +458,7 @@ void* vc1(void *arg){
             
             if (degree_max == 0)
                 break;  // all edges have been removed
-
+            
             for (int i=0;i<num;i++){
                 for (int j=0;j<num;j++){
                     if ((max_degree_vertex == i) || (max_degree_vertex == j)){
@@ -470,14 +470,14 @@ void* vc1(void *arg){
             vertex_cover2.push_back(max_degree_vertex);
             
         }
-
+        
         /////////////////////////////////////////////////////////
-
-//        if (clock_gettime(cid, &stop)==-1){
-//        std::cout << "Error : can not get thread vc1 time" << std::endl;
-//        }  
-//        total_time2 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
-
+        
+        if (clock_gettime(cid, &stop)==-1){
+            std::cout << "Error : can not get thread vc1 time" << std::endl;
+        }
+        total_time2 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
+        
         sem_post(&vc_se2);
     }
     
@@ -485,29 +485,27 @@ void* vc1(void *arg){
 }
 
 void* vc2(void *arg){
-
+    
     while(true)
     {
-
+        
         sem_wait(&io_se3);
-
+        
         if (io_exit==1)
             break;
-
-//        clockid_t cid;
-//        int retcode;
-//        struct timespec start, stop;
-//
-//        retcode = pthread_getcpuclockid(pthread_self(), &cid);
-//
-//        if(retcode){
-//            std::cerr << "Error: could not get thread time(vc2) " << std::endl;
-//        }
-//        if (clock_gettime(cid, &start)==-1){
-//            std::cout << "Error : can not get thread vc2 time" << std::endl;
-//        } 
         
-        /////////////////////////////////////////////////////
+        clockid_t cid;
+        int retcode;
+        struct timespec start, stop;
+        
+        retcode = pthread_getcpuclockid(pthread_self(), &cid);
+        
+        if(retcode){
+            std::cerr << "Error: could not get thread time(vc2) " << std::endl;
+        }
+        if (clock_gettime(cid, &start)==-1){
+            std::cout << "Error : can not get thread vc2 time" << std::endl;
+        }
         
         int k1=0;
         int fir = 0;
@@ -518,10 +516,10 @@ void* vc2(void *arg){
             }
         }
         if (k1==1){
-    
+            
             vertex_cover3.push_back(v[fir]);
             vertex_cover3.push_back(v[fir+1]);
-
+            
             for (unsigned int i = fir+2; i < v.size()-1; i=i+2)
             {
                 int k;
@@ -536,7 +534,7 @@ void* vc2(void *arg){
                         k=0;
                         break;
                     }
-                } 
+                }
                 if(k ==1)
                 {
                     vertex_cover3.push_back(v[i]);
@@ -544,14 +542,14 @@ void* vc2(void *arg){
                 }
             }
         }
-
+        
         //////////////////////////////////////////////////////
-
-//        if (clock_gettime(cid, &stop)==-1){
-//        std::cout << "Error : can not get thread vc2 time" << std::endl;
-//        }  
-//        total_time3 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
-
+        
+        if (clock_gettime(cid, &stop)==-1){
+            std::cout << "Error : can not get thread vc2 time" << std::endl;
+        }
+        total_time3 = (stop.tv_sec - start.tv_sec) * 1000 + (double)(stop.tv_nsec - start.tv_nsec)/1000000;
+        
         sem_post(&vc_se3);
     }
     return 0;
@@ -559,25 +557,25 @@ void* vc2(void *arg){
 
 
 int main(int argc, char** argv) {
-
+    
     // initialize graph matrix
     for (int i=0;i<max_vertex_num;i++){
         for (int j=0;j<max_vertex_num;j++){
-                    edgs[i][j] = maxv;
+            edgs[i][j] = maxv;
         }
     }
     
     pthread_t thread1, thread2, thread3, thread4;
     int  iret1, iret2, iret3 ,iret4;
-
+    
     sem_init(&vc_se1, 0, 0);
     sem_init(&vc_se2, 0, 0);
     sem_init(&vc_se3, 0, 0);
     sem_init(&io_se1, 0, 0);
     sem_init(&io_se1, 0, 0);
     sem_init(&io_se1, 0, 0);
-
-     /* Create independent threads each of which will execute function */
+    
+    /* Create independent threads each of which will execute function */
     iret1 = pthread_create( &thread1, NULL, io, NULL);
     if(iret1)
     {
@@ -610,6 +608,6 @@ int main(int argc, char** argv) {
     pthread_join( thread2, NULL);
     pthread_join( thread3, NULL);
     pthread_join( thread4, NULL);
-   
+    
     return 0;
 }
